@@ -13,6 +13,7 @@ import RequestBook from './components/RequestBook'
 import LatestManga from './components/LatestManga'
 import LatestSeries from './components/LatestSeries'
 import HomeDiscountedBooks from './components/HomeDiscountedBooks'
+import { FiClipboard, FiPackage, FiClock } from 'react-icons/fi'
 
 const container = {
   hidden: { opacity: 0 },
@@ -35,6 +36,70 @@ function Section({ children }) {
     >
       {children}
     </motion.section>
+  )
+}
+
+function PreOrderPromo() {
+  return (
+    <div className="rounded-3xl border bg-gradient-to-b from-white/90 to-white/70 backdrop-blur shadow-sm p-5 md:p-7">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="text-xl md:text-2xl font-extrabold text-[#2E2A28]">
+            📦 Pre-Order — اطلب أي شي مو موجود
+          </h2>
+          <p className="text-sm md:text-base text-gray-600 mt-2 leading-relaxed">
+            بدك كتاب/مانجا/بوكمارك/فيغرة وما لقيتها بالموقع؟ قدّم طلب مسبق ونحن منأمّنلك ياها ونرجع نتواصل معك.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
+            <div className="rounded-2xl border bg-white/80 p-4 flex items-center gap-3">
+              <span className="w-10 h-10 rounded-full bg-[#F4EDE4] flex items-center justify-center text-[#C05370]">
+                <FiClipboard />
+              </span>
+              <div>
+                <div className="font-bold text-[#2E2A28] text-sm">املأ الطلب بسرعة</div>
+                <div className="text-xs text-gray-600">اسم + نوع + تفاصيل</div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border bg-white/80 p-4 flex items-center gap-3">
+              <span className="w-10 h-10 rounded-full bg-[#F4EDE4] flex items-center justify-center text-[#4C7A68]">
+                <FiPackage />
+              </span>
+              <div>
+                <div className="font-bold text-[#2E2A28] text-sm">نأمّن المطلوب</div>
+                <div className="text-xs text-gray-600">حسب التوفر والسعر</div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border bg-white/80 p-4 flex items-center gap-3">
+              <span className="w-10 h-10 rounded-full bg-[#F4EDE4] flex items-center justify-center text-gray-700">
+                <FiClock />
+              </span>
+              <div>
+                <div className="font-bold text-[#2E2A28] text-sm">نتواصل معك</div>
+                <div className="text-xs text-gray-600">لتأكيد التفاصيل</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <Link
+            href="/preorder"
+            className="px-6 py-3 rounded-full bg-[#C05370] text-white font-bold hover:opacity-90 transition text-center"
+          >
+            🚀 قدّم Pre-Order
+          </Link>
+          <Link
+            href="/offers"
+            className="px-6 py-3 rounded-full border bg-white hover:bg-gray-50 transition text-center font-semibold"
+          >
+            شوف العروض
+          </Link>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -62,7 +127,6 @@ export default function Home() {
       {/* خلفية ألطف */}
       <div className="bg-gradient-to-b from-[#F9F2F4] via-[#F4EDE4] to-[#F4F7F5]">
         <div className="max-w-6xl mx-auto px-4 py-6 md:py-10 space-y-4 md:space-y-6">
-
           {/* عرض علوي */}
           <motion.div variants={section}>
             <BannerOffer />
@@ -120,10 +184,15 @@ export default function Home() {
             <LatestSeries />
           </Section>
 
-          {/* خصومات (خليه داخل كارد مثل الباقي) */}
+          {/* خصومات */}
           <Section>
             <HomeDiscountedBooks />
           </Section>
+
+          {/* ✅ Pre-Order Promo */}
+          <motion.div variants={section}>
+            <PreOrderPromo />
+          </motion.div>
 
           {/* التصنيفات */}
           <Section>
@@ -140,12 +209,7 @@ export default function Home() {
             <WhyUs />
           </Section>
 
-          {/* طلب كتاب */}
-          <Section>
-            <RequestBook />
-          </Section>
-
-          {/* فوتر صغير اختياري */}
+          
           <motion.div variants={section} className="text-center text-xs text-gray-500 py-2">
             © {new Date().getFullYear()} Blooms Bookstore — كل الحقوق محفوظة
           </motion.div>

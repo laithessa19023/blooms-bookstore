@@ -67,6 +67,14 @@ const cards = [
     tag: 'طلبات',
   },
   {
+  title: 'طلبات Pre-Order (كتب أصلية)',
+  desc: 'عرض طلبات الكتب الأصلية مع معلومات التواصل',
+  href: '/dashboard/preorders',
+  icon: FiPackage,
+  tag: 'طلبات',
+},
+
+  {
     title: 'إدارة المجموعات (سلاسل)',
     desc: 'تنظيم السلاسل وربط الكتب فيها',
     href: '/dashboard/add-series',
