@@ -98,13 +98,12 @@ export default function AddBookPage() {
       fetchBooks()
     } catch (err) {
       console.error(err)
-      setError('❌ صار خطأ')
+      setError('❌ صار خطأ أثناء الإضافة')
     }
 
     setLoading(false)
   }
 
-  /* ✅ إصلاح الخطأ هون */
   const handleUpdatePrice = async (id) => {
     const newPrice = updatedPrices[id]
     if (!newPrice) return
@@ -142,76 +141,82 @@ export default function AddBookPage() {
     <section dir="rtl" className="min-h-screen bg-gradient-to-b from-[#FDF7F9] to-[#F4F7F5]">
       <div className="max-w-5xl mx-auto px-4 py-10 space-y-8">
 
-        {/* Header */}
         <h1 className="text-3xl font-extrabold">📘 إضافة كتاب</h1>
 
         {error && <div className="bg-red-100 text-red-600 p-3 rounded-xl">{error}</div>}
         {success && <div className="bg-green-100 text-green-600 p-3 rounded-xl">{success}</div>}
 
-        {/* Form */}
+        {/* ✅ الفورم بعد الإصلاح */}
         <div className="bg-white p-6 rounded-3xl shadow space-y-4">
-
-          <input
-            placeholder="عنوان الكتاب"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full border px-4 py-3 rounded-full"
-            required
-          />
-
-          <div className="grid grid-cols-2 gap-3">
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="border px-4 py-3 rounded-full"
-            >
-              <option value="english">إنجليزي</option>
-              <option value="arabic">عربي</option>
-              <option value="kids">أطفال</option>
-              <option value="original">أصلي</option>
-            </select>
+          <form onSubmit={handleSubmit} className="space-y-4">
 
             <input
-              type="number"
-              placeholder="السعر"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="border px-4 py-3 rounded-full"
+              placeholder="عنوان الكتاب"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full border px-4 py-3 rounded-full"
               required
             />
-          </div>
 
-          <textarea
-            placeholder="وصف"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full border px-4 py-3 rounded-2xl"
-          />
+            <div className="grid grid-cols-2 gap-3">
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="border px-4 py-3 rounded-full"
+              >
+                <option value="english">إنجليزي</option>
+                <option value="arabic">عربي</option>
+                <option value="kids">أطفال</option>
+                <option value="original">أصلي</option>
+              </select>
 
-          {/* صورة */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <label className="border p-4 rounded-2xl text-center cursor-pointer">
-              <FiImage className="mx-auto mb-2" />
-              اختر صورة
               <input
-                type="file"
-                hidden
-                onChange={(e) => setImageFile(e.target.files?.[0])}
+                type="number"
+                placeholder="السعر"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="border px-4 py-3 rounded-full"
+                required
               />
-            </label>
-
-            <div className="border rounded-2xl h-40 flex items-center justify-center bg-gray-50">
-              {previewUrl ? (
-                <Image src={previewUrl} alt="" width={150} height={150} />
-              ) : (
-                <span className="text-gray-400">معاينة</span>
-              )}
             </div>
-          </div>
 
-          <button className="w-full bg-[#C05370] text-white py-3 rounded-full">
-            {loading ? '...' : '➕ إضافة كتاب'}
-          </button>
+            <textarea
+              placeholder="وصف"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full border px-4 py-3 rounded-2xl"
+            />
+
+            {/* صورة */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <label className="border p-4 rounded-2xl text-center cursor-pointer">
+                <FiImage className="mx-auto mb-2" />
+                اختر صورة
+                <input
+                  type="file"
+                  hidden
+                  onChange={(e) => setImageFile(e.target.files?.[0])}
+                />
+              </label>
+
+              <div className="border rounded-2xl h-40 flex items-center justify-center bg-gray-50">
+                {previewUrl ? (
+                  <Image src={previewUrl} alt="preview" width={150} height={150} />
+                ) : (
+                  <span className="text-gray-400">معاينة</span>
+                )}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#C05370] text-white py-3 rounded-full disabled:opacity-60"
+            >
+              {loading ? 'جاري الإضافة...' : '➕ إضافة كتاب'}
+            </button>
+
+          </form>
         </div>
 
         {/* List */}
