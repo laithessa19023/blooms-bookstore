@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { FiTrash2, FiShoppingCart, FiCheckCircle, FiInfo } from 'react-icons/fi'
+import { FiTrash2, FiShoppingCart, FiCheckCircle, FiInfo, FiLogIn } from 'react-icons/fi'
 
 export default function CartPage() {
   const [cart, setCart] = useState([])
@@ -21,6 +21,7 @@ export default function CartPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [mustLogin, setMustLogin] = useState(false)
 
   // ✅ تحميل السلة
   useEffect(() => {
@@ -66,7 +67,7 @@ export default function CartPage() {
       if (normalized === 'damascus') {
         setArea(details)
       } else {
-        // يدعم الصيغة اللي كنت تكتبها: "المحافظة - فرع القدموس: كذا"
+        // يدعم الصيغة: "المحافظة - فرع القدموس: كذا"
         const parts = details.split(' - فرع القدموس: ')
         setProvince(parts[0] || '')
         setBranch(parts[1] || '')
@@ -102,6 +103,7 @@ export default function CartPage() {
     e.preventDefault()
     setError('')
     setSuccess('')
+    setMustLogin(false)
 
     const msg = validate()
     if (msg) {
@@ -115,9 +117,20 @@ export default function CartPage() {
       data: { user },
     } = await supabase.auth.getUser()
 
+    // ✅ أهم تعديل: لازم يكون مسجل دخول حتى ينحفظ user_id ويشوف طلباته بحسابه
+    if (!user) {
+      setLoading(false)
+      setMustLogin(true)
+      setError('لازم تسجل دخول قبل إرسال الطلب حتى تقدر تشوف طلباتك بحسابك ✅')
+
+      // نخزن وجهة الرجوع بعد تسجيل الدخول
+      localStorage.setItem('redirectAfterLogin', '/cart')
+      return
+    }
+
     const { error: insertError } = await supabase.from('orders').insert([
       {
-        user_id: user?.id || null,
+        user_id: user.id,
         name: name.trim(),
         phone: phone.trim(),
         note: note.trim(),
@@ -145,7 +158,7 @@ export default function CartPage() {
     localStorage.removeItem('cart')
     setCart([])
 
-    // تفريغ الملاحظات فقط (خلي الاسم/الهاتف عادة مفيدين)
+    // تفريغ الملاحظات فقط
     setNote('')
   }
 
@@ -177,7 +190,7 @@ export default function CartPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            {/* يسار: قائمة العناصر */}
+            {/* يسار: قائمة العناصر + نموذج */}
             <div className="lg:col-span-2 space-y-4">
               <div className="rounded-3xl border bg-white/80 backdrop-blur shadow-sm p-5">
                 <h2 className="font-extrabold text-[#4C7A68] mb-4">📦 المنتجات</h2>
@@ -191,7 +204,10 @@ export default function CartPage() {
                       <div className="min-w-0">
                         <p className="font-bold text-[#2E2A28] truncate">{item.title}</p>
                         <p className="text-sm text-gray-600 mt-1">
-                          السعر: <span className="font-semibold text-[#C05370]">{Number(item.price || 0).toLocaleString()} ل.س</span>
+                          السعر:{' '}
+                          <span className="font-semibold text-[#C05370]">
+                            {Number(item.price || 0).toLocaleString()} ل.س
+                          </span>
                         </p>
                       </div>
 
@@ -216,6 +232,21 @@ export default function CartPage() {
                     ❌ {error}
                   </div>
                 )}
+
+                {mustLogin && (
+                  <div className="mb-4 rounded-2xl bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800 flex items-center justify-between gap-3">
+                    <div>
+                      🔐 لازم تسجل دخول لإرسال الطلب حتى يطلع ضمن <strong>طلباتي</strong>.
+                    </div>
+                    <Link
+                      href="/account/login"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#C05370] text-white hover:opacity-90 transition"
+                    >
+                      <FiLogIn /> تسجيل الدخول
+                    </Link>
+                  </div>
+                )}
+
                 {success && (
                   <div className="mb-4 rounded-2xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 inline-flex items-center gap-2">
                     <FiCheckCircle /> {success}
@@ -330,9 +361,7 @@ export default function CartPage() {
 
                 <div className="flex items-center justify-between text-sm text-gray-700 mt-2">
                   <span>المجموع</span>
-                  <span className="font-extrabold text-[#C05370]">
-                    {total.toLocaleString()} ل.س
-                  </span>
+                  <span className="font-extrabold text-[#C05370]">{total.toLocaleString()} ل.س</span>
                 </div>
 
                 <div className="mt-4 rounded-2xl bg-[#F4EDE4] px-4 py-3 text-xs text-gray-700 inline-flex gap-2">

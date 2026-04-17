@@ -10,6 +10,11 @@ const categories = [
     link: '/books',
   },
   {
+    title: 'كتب عربية',
+    image: '/arabic-books.jpg',
+    link: '/books?filter=arabic',
+  },
+  {
     title: 'كتب إنجليزية',
     image: '/sdafaf.JPG',
     link: '/books?filter=english',
@@ -36,7 +41,7 @@ export default function CategoriesGrid() {
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         {categories.map((cat, idx) => (
           <Link key={idx} href={cat.link}>
-            <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition group">
+            <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition group cursor-pointer">
               <div className="relative w-full h-36 sm:h-44 md:h-48">
                 <Image
                   src={cat.image}
