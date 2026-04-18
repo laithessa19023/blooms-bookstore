@@ -168,6 +168,8 @@ export default function AddBookPage() {
                 <option value="arabic">عربي</option>
                 <option value="kids">أطفال</option>
                 <option value="original">أصلي</option>
+                <option value="aseer">دار عصير الكتب</option>
+                <option value="rafedain">دار الرافدين</option>
               </select>
 
               <input

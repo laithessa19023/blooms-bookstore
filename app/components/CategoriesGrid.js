@@ -29,6 +29,18 @@ const categories = [
     image: '/700.jpeg',
     link: '/books?filter=kids',
   },
+
+  /* 🔥 جديد */
+  {
+    title: 'دار عصير الكتب',
+    image: '/aseer.jpg', // حط صورة مناسبة
+    link: '/books?filter=aseer',
+  },
+  {
+    title: 'دار الرافدين',
+    image: '/rafedain.jpg', // حط صورة مناسبة
+    link: '/books?filter=rafedain',
+  },
 ]
 
 export default function CategoriesGrid() {
@@ -41,22 +53,26 @@ export default function CategoriesGrid() {
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         {categories.map((cat, idx) => (
           <Link key={idx} href={cat.link}>
-            <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition group cursor-pointer">
+            <div className="border border-gray-300 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition group cursor-pointer">
+              
+              {/* صورة */}
               <div className="relative w-full h-36 sm:h-44 md:h-48">
                 <Image
                   src={cat.image}
                   alt={cat.title}
                   fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
                 />
               </div>
 
-              <div className="p-3 text-sm sm:text-base font-semibold text-gray-800 flex items-center justify-between">
+              {/* عنوان */}
+              <div className="p-3 text-sm sm:text-base font-bold text-gray-800 flex items-center justify-between">
                 <span>{cat.title}</span>
                 <span className="text-[#C05370] transition-transform group-hover:-translate-x-1">
                   →
                 </span>
               </div>
+
             </div>
           </Link>
         ))}

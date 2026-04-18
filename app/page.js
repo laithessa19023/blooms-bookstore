@@ -17,10 +17,7 @@ import Image from 'next/image'
 
 const container = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 }
 
 const section = {
@@ -32,15 +29,15 @@ function Section({ children }) {
   return (
     <motion.section
       variants={section}
-      className="rounded-3xl bg-white/80 backdrop-blur border border-gray-100 shadow-md p-5 md:p-7 hover:shadow-lg transition"
+      className="rounded-3xl bg-white/80 backdrop-blur border shadow-md p-5 md:p-7"
     >
       {children}
     </motion.section>
   )
 }
 
-/* 🔥 سكشن عربي مطوّر */
-function ArabicBooksSection() {
+/* 🔥 دار عصير الكتب */
+function AseerBooksSection() {
   const [books, setBooks] = useState([])
 
   useEffect(() => {
@@ -51,7 +48,7 @@ function ArabicBooksSection() {
     const { data } = await supabase
       .from('books')
       .select('*')
-      .eq('category', 'arabic')
+      .eq('category', 'aseer')
       .order('created_at', { ascending: false })
       .limit(4)
 
@@ -65,14 +62,48 @@ function ArabicBooksSection() {
   }
 
   return (
+    <BooksGrid title="📚 دار عصير الكتب" link="/books?filter=aseer" books={books} onAdd={addToCart} />
+  )
+}
+
+/* 🔥 دار الرافدين */
+function RafedainBooksSection() {
+  const [books, setBooks] = useState([])
+
+  useEffect(() => {
+    fetchBooks()
+  }, [])
+
+  const fetchBooks = async () => {
+    const { data } = await supabase
+      .from('books')
+      .select('*')
+      .eq('category', 'rafedain')
+      .order('created_at', { ascending: false })
+      .limit(4)
+
+    setBooks(data || [])
+  }
+
+  const addToCart = (book) => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+    localStorage.setItem('cart', JSON.stringify([...cart, book]))
+    alert(`✅ تمت إضافة "${book.title}"`)
+  }
+
+  return (
+    <BooksGrid title="📚 دار الرافدين" link="/books?filter=rafedain" books={books} onAdd={addToCart} />
+  )
+}
+
+/* 🔥 كارد موحّد */
+function BooksGrid({ title, link, books, onAdd }) {
+  return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-extrabold text-[#2E2A28]">📖 كتب عربية</h2>
+        <h2 className="text-2xl font-extrabold text-[#2E2A28]">{title}</h2>
 
-        <Link
-          href="/books?filter=arabic"
-          className="text-sm font-bold text-[#C05370] hover:underline"
-        >
+        <Link href={link} className="text-sm font-bold text-[#C05370] hover:underline">
           عرض الكل
         </Link>
       </div>
@@ -84,18 +115,18 @@ function ArabicBooksSection() {
           {books.map((book) => (
             <div
               key={book.id}
-              className="rounded-3xl overflow-hidden bg-white shadow hover:shadow-xl transition"
+              className="rounded-3xl overflow-hidden bg-white shadow hover:shadow-xl transition group"
             >
-              <div className="relative h-52">
+              <div className="relative h-56 bg-gray-50">
                 <Image
                   src={book.image || '/fallback.jpg'}
                   alt={book.title}
                   fill
-                  className="object-cover hover:scale-105 transition"
+                  className="object-contain p-4 group-hover:scale-105 transition"
                 />
               </div>
 
-              <div className="p-4 space-y-2">
+              <div className="p-4 space-y-2 text-right">
                 <p className="font-bold text-sm line-clamp-2">{book.title}</p>
 
                 <p className="text-[#C05370] font-extrabold">
@@ -103,10 +134,10 @@ function ArabicBooksSection() {
                 </p>
 
                 <button
-                  onClick={() => addToCart(book)}
-                  className="w-full bg-[#C05370] text-white py-2 rounded-full text-sm font-bold hover:opacity-90"
+                  onClick={() => onAdd(book)}
+                  className="w-full bg-[#4C7A68] text-white py-2.5 rounded-full text-sm font-bold hover:opacity-90 transition"
                 >
-                  🛒 إضافة للسلة
+                  🛒 إضافة إلى السلة
                 </button>
               </div>
             </div>
@@ -133,40 +164,21 @@ export default function Home() {
             <BannerOffer />
           </motion.div>
 
-          {/* 🔥 Hero محسّن */}
+          {/* Hero */}
           <motion.section
             variants={section}
-            className="rounded-3xl bg-white shadow-md p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-4"
+            className="rounded-3xl bg-white shadow-md p-6 flex justify-between items-center"
           >
-            <div>
-              <h1 className="text-3xl font-extrabold text-[#2E2A28]">
-                أهلاً في <span className="text-[#C05370]">Blooms</span> 📚
-              </h1>
-              <p className="text-gray-600 mt-2 text-sm">
-                أفضل الكتب، المانجا، والعروض الحصرية ✨
-              </p>
-            </div>
+            <h1 className="text-2xl font-extrabold">
+              أهلاً في <span className="text-[#C05370]">Blooms</span> 📚
+            </h1>
 
-            <div className="flex gap-2">
-              <Link
-                href="/books"
-                className="px-6 py-2.5 rounded-full bg-[#C05370] text-white"
-              >
-                تصفّح الكتب
-              </Link>
-
-              <Link
-                href="/offers"
-                className="px-6 py-2.5 rounded-full border bg-white"
-              >
-                العروض
-              </Link>
-            </div>
+            <Link href="/books" className="px-5 py-2 rounded-full bg-[#C05370] text-white">
+              تصفّح الكتب
+            </Link>
           </motion.section>
 
-          <motion.div variants={section}>
-            <MobileSearchBar />
-          </motion.div>
+          <MobileSearchBar />
 
           <Section>
             <Slider />
@@ -180,17 +192,25 @@ export default function Home() {
             <LatestSeries />
           </Section>
 
-          
+        
 
+          {/* 🔥 دار عصير الكتب */}
           <Section>
-            <ArabicBooksSection />
+            <AseerBooksSection />
+          </Section>
+
+          {/* 🔥 دار الرافدين */}
+          <Section>
+            <RafedainBooksSection />
           </Section>
 
           <Section>
             <CategoriesGrid />
           </Section>
 
-         
+          <Section>
+            <LatestManga />
+          </Section>
 
           <Section>
             <WhyUs />
