@@ -78,11 +78,12 @@ export default function NewBooks() {
       const { data, error } = await supabase
         .from('books')
         .select('*')
+        .eq('category', 'english') // فقط الكتب الإنجليزية
         .order('created_at', { ascending: false })
         .limit(4)
 
       if (error) {
-        console.error('فشل في جلب الكتب الجديدة:', error.message)
+        console.error('فشل في جلب الكتب الإنجليزية الجديدة:', error.message)
         setBooks([])
       } else {
         setBooks(data || [])
@@ -117,15 +118,15 @@ export default function NewBooks() {
       <div className="mb-6 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#2E2A28]">
-            📚 الكتب الجديدة
+            📚 الكتب الإنجليزية الجديدة
           </h2>
           <p className="mt-1 text-sm text-gray-500">
-            أحدث الإضافات المختارة لك
+            أحدث الكتب الإنجليزية المضافة
           </p>
         </div>
 
         <Link
-          href="/books"
+          href="/books?filter=english"
           className="inline-flex items-center gap-2 rounded-full border border-[#ead7de] bg-white px-4 py-2 text-xs sm:text-sm font-bold text-[#C05370] transition hover:bg-[#fff7fa]"
         >
           عرض الكل
@@ -141,11 +142,10 @@ export default function NewBooks() {
         </div>
       ) : books.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 py-10 text-center text-sm text-gray-500">
-          لا توجد كتب جديدة حالياً
+          لا توجد كتب إنجليزية جديدة حالياً
         </div>
       ) : (
         <>
-          {/* للشاشات الكبيرة */}
           <div className="hidden sm:grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {books.map((book) => (
               <BookCard
@@ -156,12 +156,11 @@ export default function NewBooks() {
             ))}
           </div>
 
-          {/* للموبايل */}
           <div className="sm:hidden">
             <Swiper
-              spaceBetween={16}
-              slidesPerView={1.15}
-              loop={books.length > 1}
+              spaceBetween={12}
+              slidesPerView={2}
+              loop={books.length > 2}
               autoplay={{
                 delay: 3200,
                 disableOnInteraction: false,

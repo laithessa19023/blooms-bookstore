@@ -5,6 +5,9 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay } from 'swiper/modules'
+import 'swiper/css'
 
 import Slider from './components/Slider'
 import CategoriesGrid from './components/CategoriesGrid'
@@ -45,14 +48,14 @@ function Section({ children, className = '' }) {
 
 function SectionHeader({ title, link }) {
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="mb-6 flex items-center justify-between">
       <h2 className="text-xl md:text-2xl font-extrabold tracking-tight text-[#2E2A28]">
         {title}
       </h2>
 
       <Link
         href={link}
-        className="inline-flex items-center gap-2 text-sm font-bold text-[#C05370] hover:text-[#a84460] transition"
+        className="inline-flex items-center gap-2 text-sm font-bold text-[#C05370] transition hover:text-[#a84460]"
       >
         عرض الكل
         <span>←</span>
@@ -62,14 +65,19 @@ function SectionHeader({ title, link }) {
 }
 
 function BookCard({ book, onAdd }) {
+  const imageSrc =
+    book.image?.startsWith('http') || book.image?.startsWith('/')
+      ? book.image
+      : '/fallback.jpg'
+
   return (
-    <div className="group overflow-hidden rounded-[24px] border border-[#f1e8eb] bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300">
-      <div className="relative h-56 md:h-64 bg-gradient-to-b from-[#fffafb] to-[#f7f7f7] overflow-hidden">
+    <div className="group h-full overflow-hidden rounded-[24px] border border-[#f1e8eb] bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+      <div className="relative h-44 sm:h-56 md:h-64 overflow-hidden bg-gradient-to-b from-[#fffafb] to-[#f7f7f7]">
         <Image
-          src={book.image || '/fallback.jpg'}
+          src={imageSrc}
           alt={book.title}
           fill
-          className="object-contain p-4 group-hover:scale-105 transition duration-300"
+          className="object-contain p-3 md:p-4 transition duration-300 group-hover:scale-105"
         />
 
         <div className="absolute top-3 right-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold text-[#4C7A68] shadow-sm">
@@ -77,24 +85,33 @@ function BookCard({ book, onAdd }) {
         </div>
       </div>
 
-      <div className="p-4 text-right space-y-3">
-        <h3 className="text-sm md:text-base font-extrabold text-[#2E2A28] line-clamp-2 leading-6 min-h-[48px]">
+      <div className="space-y-3 p-4 text-right">
+        <h3 className="min-h-[48px] text-sm md:text-base font-extrabold leading-6 text-[#2E2A28] line-clamp-2">
           {book.title}
         </h3>
 
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-[#C05370] font-extrabold text-base md:text-lg">
-            {Number(book.price || 0).toLocaleString()} ل.س
-          </p>
-        </div>
+        <p className="text-sm md:text-lg font-extrabold text-[#C05370]">
+          {Number(book.price || 0).toLocaleString()} ل.س
+        </p>
 
         <button
           onClick={() => onAdd(book)}
-          className="w-full rounded-full bg-[#4C7A68] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#3f6757] active:scale-[0.98] transition"
+          className="w-full rounded-full bg-[#4C7A68] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#3f6757] active:scale-[0.98]"
         >
           🛒 إضافة إلى السلة
         </button>
       </div>
+    </div>
+  )
+}
+
+function BookCardSkeleton() {
+  return (
+    <div className="rounded-[24px] border bg-white p-3 shadow-sm animate-pulse">
+      <div className="mb-4 h-44 sm:h-56 md:h-64 rounded-2xl bg-gray-100" />
+      <div className="mb-2 h-4 rounded bg-gray-100" />
+      <div className="mb-4 h-4 w-2/3 rounded bg-gray-100" />
+      <div className="h-10 rounded-full bg-gray-100" />
     </div>
   )
 }
@@ -105,17 +122,9 @@ function BooksGrid({ title, link, books, loading, onAdd }) {
       <SectionHeader title={title} link={link} />
 
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
           {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="rounded-[24px] border bg-white p-3 shadow-sm animate-pulse"
-            >
-              <div className="h-56 md:h-64 rounded-2xl bg-gray-100 mb-4" />
-              <div className="h-4 bg-gray-100 rounded mb-2" />
-              <div className="h-4 bg-gray-100 rounded w-2/3 mb-4" />
-              <div className="h-10 bg-gray-100 rounded-full" />
-            </div>
+            <BookCardSkeleton key={i} />
           ))}
         </div>
       ) : books.length === 0 ? (
@@ -123,11 +132,35 @@ function BooksGrid({ title, link, books, loading, onAdd }) {
           لا يوجد كتب حالياً
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {books.map((book) => (
-            <BookCard key={book.id} book={book} onAdd={onAdd} />
-          ))}
-        </div>
+        <>
+          {/* موبايل: سلايدر كتابين */}
+          <div className="md:hidden">
+            <Swiper
+              spaceBetween={12}
+              slidesPerView={2}
+              loop={books.length > 2}
+              autoplay={{
+                delay: 2800,
+                disableOnInteraction: false,
+              }}
+              modules={[Autoplay]}
+              className="pb-2"
+            >
+              {books.map((book) => (
+                <SwiperSlide key={book.id} className="h-auto">
+                  <BookCard book={book} onAdd={onAdd} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+
+          {/* ديسكتوب وتابلت: Grid */}
+          <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {books.map((book) => (
+              <BookCard key={book.id} book={book} onAdd={onAdd} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   )
@@ -146,9 +179,12 @@ function PublisherBooksSection({ title, filter, link }) {
         .select('*')
         .eq('category', filter)
         .order('created_at', { ascending: false })
-        .limit(4)
+        .limit(6)
 
-      if (!error) {
+      if (error) {
+        console.error(`فشل في جلب الكتب للقسم ${filter}:`, error.message)
+        setBooks([])
+      } else {
         setBooks(data || [])
       }
 
@@ -160,7 +196,21 @@ function PublisherBooksSection({ title, filter, link }) {
 
   const addToCart = (book) => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]')
-    localStorage.setItem('cart', JSON.stringify([...cart, book]))
+    const alreadyInCart = cart.find((item) => item.id === book.id)
+
+    if (alreadyInCart) {
+      alert('📚 هذا الكتاب موجود مسبقًا في السلة')
+      return
+    }
+
+    cart.push({
+      id: book.id,
+      title: book.title,
+      price: book.price,
+      image: book.image,
+    })
+
+    localStorage.setItem('cart', JSON.stringify(cart))
     alert(`✅ تمت إضافة "${book.title}" إلى السلة`)
   }
 
@@ -185,7 +235,7 @@ export default function Home() {
       dir="rtl"
     >
       <div className="bg-[radial-gradient(circle_at_top,_#fff7fa,_#f5ede4_45%,_#f4f7f5_100%)]">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6 md:space-y-8">
+        <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:space-y-8 md:px-6 md:py-8">
           <motion.div variants={section}>
             <BannerOffer />
           </motion.div>
@@ -194,10 +244,10 @@ export default function Home() {
             variants={section}
             className="relative overflow-hidden rounded-[32px] border border-white/60 bg-white/90 backdrop-blur-xl shadow-[0_14px_40px_rgba(0,0,0,0.07)]"
           >
-            <div className="absolute inset-0 bg-gradient-to-l from-[#C05370]/10 via-transparent to-[#4C7A68]/10 pointer-events-none" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-l from-[#C05370]/10 via-transparent to-[#4C7A68]/10" />
 
-            <div className="relative px-6 py-8 md:px-10 md:py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div className="space-y-3 max-w-2xl">
+            <div className="relative flex flex-col items-start justify-between gap-6 px-6 py-8 md:flex-row md:items-center md:px-10 md:py-12">
+              <div className="max-w-2xl space-y-3">
                 <span className="inline-block rounded-full bg-[#C05370]/10 px-4 py-1.5 text-sm font-bold text-[#C05370]">
                   متجر كتبك المفضل
                 </span>
@@ -206,7 +256,7 @@ export default function Home() {
                   أهلاً في <span className="text-[#C05370]">Blooms</span> 📚
                 </h1>
 
-                <p className="text-sm md:text-base text-gray-600 leading-7">
+                <p className="text-sm md:text-base leading-7 text-gray-600">
                   اكتشف أحدث الكتب، أفضل السلاسل، والمانغا المميزة ضمن تجربة
                   أنيقة وسريعة وسهلة.
                 </p>
@@ -214,28 +264,28 @@ export default function Home() {
                 <div className="flex flex-wrap gap-3 pt-2">
                   <Link
                     href="/books"
-                    className="rounded-full bg-[#C05370] px-6 py-3 text-sm md:text-base font-bold text-white hover:bg-[#aa4862] transition shadow-sm"
+                    className="rounded-full bg-[#C05370] px-6 py-3 text-sm md:text-base font-bold text-white shadow-sm transition hover:bg-[#aa4862]"
                   >
                     تصفّح الكتب
                   </Link>
 
                   <Link
                     href="/categories"
-                    className="rounded-full border border-[#d9c6cd] bg-white px-6 py-3 text-sm md:text-base font-bold text-[#2E2A28] hover:bg-[#faf7f8] transition"
+                    className="rounded-full border border-[#d9c6cd] bg-white px-6 py-3 text-sm md:text-base font-bold text-[#2E2A28] transition hover:bg-[#faf7f8]"
                   >
                     استكشف التصنيفات
                   </Link>
                 </div>
               </div>
 
-              <div className="hidden md:flex items-center gap-3">
-                <div className="rounded-3xl bg-[#fff7fa] px-5 py-4 shadow-sm border border-[#f1dce3]">
-                  <p className="text-xs text-gray-500 mb-1">تجربة قراءة</p>
+              <div className="hidden items-center gap-3 md:flex">
+                <div className="rounded-3xl border border-[#f1dce3] bg-[#fff7fa] px-5 py-4 shadow-sm">
+                  <p className="mb-1 text-xs text-gray-500">تجربة قراءة</p>
                   <p className="font-extrabold text-[#2E2A28]">أجمل وأكثر هدوءاً</p>
                 </div>
 
-                <div className="rounded-3xl bg-[#f4faf7] px-5 py-4 shadow-sm border border-[#d8ebe2]">
-                  <p className="text-xs text-gray-500 mb-1">عروض مستمرة</p>
+                <div className="rounded-3xl border border-[#d8ebe2] bg-[#f4faf7] px-5 py-4 shadow-sm">
+                  <p className="mb-1 text-xs text-gray-500">عروض مستمرة</p>
                   <p className="font-extrabold text-[#2E2A28]">على كتب مختارة</p>
                 </div>
               </div>
