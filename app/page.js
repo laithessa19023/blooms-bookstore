@@ -299,7 +299,9 @@ export default function Home() {
           <Section>
             <Slider />
           </Section>
-
+<Section>
+            <CategoriesGrid />
+          </Section>
           <Section>
             <NewBooks />
           </Section>
@@ -324,9 +326,7 @@ export default function Home() {
             />
           </Section>
 
-          <Section>
-            <CategoriesGrid />
-          </Section>
+          
 
           <Section>
             <LatestManga />

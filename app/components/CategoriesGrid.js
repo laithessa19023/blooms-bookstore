@@ -19,26 +19,19 @@ const categories = [
     image: '/sdafaf.JPG',
     link: '/books?filter=english',
   },
-  {
-    title: 'كتب أصلية (أورجنال)',
-    image: '/Untitleddesign.png',
-    link: '/books?filter=original',
-  },
-  {
-    title: 'كتب للأطفال',
-    image: '/700.jpeg',
-    link: '/books?filter=kids',
-  },
+ 
+
+ 
 
   /* 🔥 جديد */
   {
     title: 'دار عصير الكتب',
-    image: '/aseer.jpg', // حط صورة مناسبة
+    image: '/images.png', // حط صورة مناسبة
     link: '/books?filter=aseer',
   },
   {
     title: 'دار الرافدين',
-    image: '/rafedain.jpg', // حط صورة مناسبة
+    image: '/667ab4e396b94-1719317731.png', // حط صورة مناسبة
     link: '/books?filter=rafedain',
   },
 ]

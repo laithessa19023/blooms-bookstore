@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay } from 'swiper/modules'
+import 'swiper/css'
 
 function ArabicBookCard({ book, onAddToCart }) {
   const imageSrc =
@@ -12,8 +15,8 @@ function ArabicBookCard({ book, onAddToCart }) {
       : '/fallback.jpg'
 
   return (
-    <div className="group overflow-hidden rounded-[26px] border border-[#f1e6ea] bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
-      <div className="relative h-56 md:h-64 overflow-hidden bg-gradient-to-b from-[#fffafb] to-[#f7f7f7]">
+    <div className="group h-full overflow-hidden rounded-[26px] border border-[#f1e6ea] bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
+      <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden bg-gradient-to-b from-[#fffafb] to-[#f7f7f7]">
         <Image
           src={imageSrc}
           alt={book.title}
@@ -26,26 +29,26 @@ function ArabicBookCard({ book, onAddToCart }) {
         </div>
       </div>
 
-      <div className="p-5 text-right space-y-3">
-        <h3 className="line-clamp-2 min-h-[52px] text-base font-extrabold leading-7 text-[#2E2A28]">
+      <div className="p-4 md:p-5 text-right space-y-3">
+        <h3 className="line-clamp-2 min-h-[52px] text-sm sm:text-base font-extrabold leading-7 text-[#2E2A28]">
           {book.title}
         </h3>
 
-        <p className="text-lg font-extrabold text-[#C05370]">
+        <p className="text-base md:text-lg font-extrabold text-[#C05370]">
           {Number(book.price || 0).toLocaleString()} ل.س
         </p>
 
         <div className="flex flex-col gap-2 pt-2">
           <Link
             href={`/books/${book.id}`}
-            className="rounded-full border border-[#e8dce1] bg-white py-2.5 text-center text-sm font-bold text-[#2E2A28] transition hover:bg-[#faf7f8]"
+            className="rounded-full border border-[#e8dce1] bg-white py-2.5 text-center text-xs sm:text-sm font-bold text-[#2E2A28] transition hover:bg-[#faf7f8]"
           >
             عرض التفاصيل
           </Link>
 
           <button
             onClick={() => onAddToCart(book)}
-            className="rounded-full bg-[#C05370] py-2.5 text-center text-sm font-bold text-white shadow-sm transition hover:bg-[#ab4862] active:scale-[0.98]"
+            className="rounded-full bg-[#C05370] py-2.5 text-center text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#ab4862] active:scale-[0.98]"
           >
             🛒 إضافة للسلة
           </button>
@@ -58,7 +61,7 @@ function ArabicBookCard({ book, onAddToCart }) {
 function ArabicBookCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-[26px] border border-[#f1e6ea] bg-white p-4 shadow-sm animate-pulse">
-      <div className="h-56 md:h-64 rounded-2xl bg-gray-100" />
+      <div className="h-48 sm:h-56 md:h-64 rounded-2xl bg-gray-100" />
       <div className="mt-4 h-4 rounded bg-gray-100" />
       <div className="mt-2 h-4 w-2/3 rounded bg-gray-100" />
       <div className="mt-4 h-10 rounded-full bg-gray-100" />
@@ -80,7 +83,7 @@ export default function ArabicBooksSection() {
         .select('*')
         .eq('category', 'arabic')
         .order('created_at', { ascending: false })
-        .limit(4)
+        .limit(6)
 
       if (error) {
         console.error('فشل في جلب الكتب العربية:', error.message)
@@ -137,7 +140,7 @@ export default function ArabicBooksSection() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {[...Array(4)].map((_, index) => (
             <ArabicBookCardSkeleton key={index} />
           ))}
@@ -147,15 +150,39 @@ export default function ArabicBooksSection() {
           لا يوجد كتب عربية حالياً
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {books.map((book) => (
-            <ArabicBookCard
-              key={book.id}
-              book={book}
-              onAddToCart={addToCart}
-            />
-          ))}
-        </div>
+        <>
+          {/* موبايل */}
+          <div className="sm:hidden">
+            <Swiper
+              spaceBetween={12}
+              slidesPerView={2}
+              loop={books.length > 2}
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+              }}
+              modules={[Autoplay]}
+              className="pb-2"
+            >
+              {books.map((book) => (
+                <SwiperSlide key={book.id} className="h-auto">
+                  <ArabicBookCard book={book} onAddToCart={addToCart} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+
+          {/* تابلت + ديسكتوب */}
+          <div className="hidden sm:grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+            {books.map((book) => (
+              <ArabicBookCard
+                key={book.id}
+                book={book}
+                onAddToCart={addToCart}
+              />
+            ))}
+          </div>
+        </>
       )}
     </section>
   )
