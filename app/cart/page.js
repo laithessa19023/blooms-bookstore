@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { FiTrash2, FiShoppingCart, FiCheckCircle, FiInfo, FiLogIn } from 'react-icons/fi'
+import { FiTrash2, FiShoppingCart, FiCheckCircle, FiInfo } from 'react-icons/fi'
 
 export default function CartPage() {
   const [cart, setCart] = useState([])
@@ -21,20 +21,20 @@ export default function CartPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [mustLogin, setMustLogin] = useState(false)
 
-  // ✅ تحميل السلة
+  // تحميل السلة
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem('cart') || '[]')
     setCart(storedCart)
   }, [])
 
-  // ✅ جلب بروفايل المستخدم (مع معالجة اختلاف قيم location_type)
+  // جلب بروفايل المستخدم إذا كان مسجل دخول
   useEffect(() => {
     const fetchProfile = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser()
+
       if (!user) return
 
       const { data: profile } = await supabase
@@ -45,12 +45,9 @@ export default function CartPage() {
 
       if (!profile) return
 
-      // ✅ حسب صفحة التسجيل عندك: full_name
       setName(profile.full_name || profile.name || '')
       setPhone(profile.phone || '')
 
-      // ✅ Mapping لقيم المكان (عربي/انجليزي)
-      // ممكن يكون: "damascus" أو "دمشق" أو "outside" أو "محافظة أخرى"
       const ltRaw = (profile.location_type || '').toString().trim()
 
       const normalized =
@@ -67,7 +64,6 @@ export default function CartPage() {
       if (normalized === 'damascus') {
         setArea(details)
       } else {
-        // يدعم الصيغة: "المحافظة - فرع القدموس: كذا"
         const parts = details.split(' - فرع القدموس: ')
         setProvince(parts[0] || '')
         setBranch(parts[1] || '')
@@ -92,9 +88,17 @@ export default function CartPage() {
     if (!name.trim() || !phone.trim()) return 'يرجى إدخال الاسم ورقم الهاتف'
     if (cart.length === 0) return 'السلة فارغة 😢'
 
-    if (locationType === 'damascus' && !area.trim()) return 'يرجى إدخال اسم المنطقة داخل دمشق'
-    if (locationType === 'outside' && !province.trim()) return 'يرجى إدخال اسم المحافظة'
-    if (locationType === 'outside' && !branch.trim()) return 'يرجى إدخال اسم فرع القدموس'
+    if (locationType === 'damascus' && !area.trim()) {
+      return 'يرجى إدخال اسم المنطقة داخل دمشق'
+    }
+
+    if (locationType === 'outside' && !province.trim()) {
+      return 'يرجى إدخال اسم المحافظة'
+    }
+
+    if (locationType === 'outside' && !branch.trim()) {
+      return 'يرجى إدخال اسم فرع القدموس'
+    }
 
     return ''
   }
@@ -103,7 +107,6 @@ export default function CartPage() {
     e.preventDefault()
     setError('')
     setSuccess('')
-    setMustLogin(false)
 
     const msg = validate()
     if (msg) {
@@ -117,32 +120,21 @@ export default function CartPage() {
       data: { user },
     } = await supabase.auth.getUser()
 
-    // ✅ أهم تعديل: لازم يكون مسجل دخول حتى ينحفظ user_id ويشوف طلباته بحسابه
-    if (!user) {
-      setLoading(false)
-      setMustLogin(true)
-      setError('لازم تسجل دخول قبل إرسال الطلب حتى تقدر تشوف طلباتك بحسابك ✅')
-
-      // نخزن وجهة الرجوع بعد تسجيل الدخول
-      localStorage.setItem('redirectAfterLogin', '/cart')
-      return
+    const orderPayload = {
+      user_id: user?.id || null,
+      name: name.trim(),
+      phone: phone.trim(),
+      note: note.trim(),
+      items: cart,
+      location_type: locationType,
+      area: locationType === 'damascus' ? area.trim() : null,
+      province: locationType === 'outside' ? province.trim() : null,
+      kadmous_branch: locationType === 'outside' ? branch.trim() : null,
     }
 
-    const { error: insertError } = await supabase.from('orders').insert([
-      {
-        user_id: user.id,
-        name: name.trim(),
-        phone: phone.trim(),
-        note: note.trim(),
-        items: cart,
-
-        // نخزن القيم consistent (damascus/outside)
-        location_type: locationType,
-        area: locationType === 'damascus' ? area.trim() : null,
-        province: locationType === 'outside' ? province.trim() : null,
-        kadmous_branch: locationType === 'outside' ? branch.trim() : null,
-      },
-    ])
+    const { error: insertError } = await supabase
+      .from('orders')
+      .insert([orderPayload])
 
     setLoading(false)
 
@@ -154,23 +146,25 @@ export default function CartPage() {
 
     setSuccess('✅ تم إرسال الطلب بنجاح!')
 
-    // تفريغ السلة
     localStorage.removeItem('cart')
     setCart([])
-
-    // تفريغ الملاحظات فقط
     setNote('')
   }
 
   return (
-    <section dir="rtl" className="min-h-screen bg-gradient-to-b from-[#F9F2F4] via-white to-[#F4F7F5]">
+    <section
+      dir="rtl"
+      className="min-h-screen bg-gradient-to-b from-[#F9F2F4] via-white to-[#F4F7F5]"
+    >
       <div className="max-w-5xl mx-auto px-4 py-8 md:py-12">
         <div className="flex items-end justify-between gap-3 mb-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-[#2E2A28] inline-flex items-center gap-2">
               <FiShoppingCart /> سلة الطلبات
             </h1>
-            <p className="text-sm text-gray-600 mt-1">راجع منتجاتك وأكمل بيانات التوصيل</p>
+            <p className="text-sm text-gray-600 mt-1">
+              راجع منتجاتك وأكمل بيانات التوصيل
+            </p>
           </div>
 
           <Link href="/books" className="text-sm text-[#C05370] hover:underline">
@@ -190,7 +184,6 @@ export default function CartPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            {/* يسار: قائمة العناصر + نموذج */}
             <div className="lg:col-span-2 space-y-4">
               <div className="rounded-3xl border bg-white/80 backdrop-blur shadow-sm p-5">
                 <h2 className="font-extrabold text-[#4C7A68] mb-4">📦 المنتجات</h2>
@@ -223,27 +216,17 @@ export default function CartPage() {
                 </ul>
               </div>
 
-              {/* نموذج الطلب */}
               <div className="rounded-3xl border bg-white/80 backdrop-blur shadow-sm p-5">
                 <h2 className="font-extrabold text-[#4C7A68] mb-4">🚚 بيانات التوصيل</h2>
+
+                <div className="mb-4 rounded-2xl bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800">
+                  يمكنك إتمام الطلب بدون تسجيل دخول، لكن تسجيل الدخول يساعدك لاحقًا على
+                  متابعة طلباتك بسهولة.
+                </div>
 
                 {error && (
                   <div className="mb-4 rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
                     ❌ {error}
-                  </div>
-                )}
-
-                {mustLogin && (
-                  <div className="mb-4 rounded-2xl bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800 flex items-center justify-between gap-3">
-                    <div>
-                      🔐 لازم تسجل دخول لإرسال الطلب حتى يطلع ضمن <strong>طلباتي</strong>.
-                    </div>
-                    <Link
-                      href="/account/login"
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#C05370] text-white hover:opacity-90 transition"
-                    >
-                      <FiLogIn /> تسجيل الدخول
-                    </Link>
                   </div>
                 )}
 
@@ -292,10 +275,12 @@ export default function CartPage() {
 
                   {locationType === 'damascus' && (
                     <div>
-                      <label className="block mb-1 text-sm font-medium">اسم المنطقة داخل دمشق</label>
+                      <label className="block mb-1 text-sm font-medium">
+                        اسم المنطقة داخل دمشق
+                      </label>
                       <input
                         type="text"
-                        className="w-full border px-4 py-2.5 rounded-full"
+                        className="w-full border px-4 py-2.5 rounded-full focus:outline-none focus:ring-2 focus:ring-[#C05370]/30 focus:border-[#C05370]"
                         value={area}
                         onChange={(e) => setArea(e.target.value)}
                         required
@@ -309,7 +294,7 @@ export default function CartPage() {
                         <label className="block mb-1 text-sm font-medium">اسم المحافظة</label>
                         <input
                           type="text"
-                          className="w-full border px-4 py-2.5 rounded-full"
+                          className="w-full border px-4 py-2.5 rounded-full focus:outline-none focus:ring-2 focus:ring-[#C05370]/30 focus:border-[#C05370]"
                           value={province}
                           onChange={(e) => setProvince(e.target.value)}
                           required
@@ -320,7 +305,7 @@ export default function CartPage() {
                         <label className="block mb-1 text-sm font-medium">اسم فرع القدموس</label>
                         <input
                           type="text"
-                          className="w-full border px-4 py-2.5 rounded-full"
+                          className="w-full border px-4 py-2.5 rounded-full focus:outline-none focus:ring-2 focus:ring-[#C05370]/30 focus:border-[#C05370]"
                           value={branch}
                           onChange={(e) => setBranch(e.target.value)}
                           required
@@ -330,9 +315,11 @@ export default function CartPage() {
                   )}
 
                   <div>
-                    <label className="block mb-1 text-sm font-medium">ملاحظات إضافية (اختياري)</label>
+                    <label className="block mb-1 text-sm font-medium">
+                      ملاحظات إضافية (اختياري)
+                    </label>
                     <textarea
-                      className="w-full border px-4 py-3 rounded-2xl min-h-[90px]"
+                      className="w-full border px-4 py-3 rounded-2xl min-h-[90px] focus:outline-none focus:ring-2 focus:ring-[#C05370]/30 focus:border-[#C05370]"
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
                     />
@@ -349,7 +336,6 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* يمين: الملخص */}
             <div className="space-y-4">
               <div className="rounded-3xl border bg-white/80 backdrop-blur shadow-sm p-5">
                 <h2 className="font-extrabold text-[#4C7A68] mb-3">🧾 ملخص الطلب</h2>
@@ -361,7 +347,9 @@ export default function CartPage() {
 
                 <div className="flex items-center justify-between text-sm text-gray-700 mt-2">
                   <span>المجموع</span>
-                  <span className="font-extrabold text-[#C05370]">{total.toLocaleString()} ل.س</span>
+                  <span className="font-extrabold text-[#C05370]">
+                    {total.toLocaleString()} ل.س
+                  </span>
                 </div>
 
                 <div className="mt-4 rounded-2xl bg-[#F4EDE4] px-4 py-3 text-xs text-gray-700 inline-flex gap-2">
