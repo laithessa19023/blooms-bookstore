@@ -133,7 +133,6 @@ function BooksGrid({ title, link, books, loading, onAdd }) {
         </div>
       ) : (
         <>
-          {/* موبايل: سلايدر كتابين */}
           <div className="md:hidden">
             <Swiper
               spaceBetween={12}
@@ -154,7 +153,6 @@ function BooksGrid({ title, link, books, loading, onAdd }) {
             </Swiper>
           </div>
 
-          {/* ديسكتوب وتابلت: Grid */}
           <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {books.map((book) => (
               <BookCard key={book.id} book={book} onAdd={onAdd} />
@@ -281,12 +279,16 @@ export default function Home() {
               <div className="hidden items-center gap-3 md:flex">
                 <div className="rounded-3xl border border-[#f1dce3] bg-[#fff7fa] px-5 py-4 shadow-sm">
                   <p className="mb-1 text-xs text-gray-500">تجربة قراءة</p>
-                  <p className="font-extrabold text-[#2E2A28]">أجمل وأكثر هدوءاً</p>
+                  <p className="font-extrabold text-[#2E2A28]">
+                    أجمل وأكثر هدوءاً
+                  </p>
                 </div>
 
                 <div className="rounded-3xl border border-[#d8ebe2] bg-[#f4faf7] px-5 py-4 shadow-sm">
                   <p className="mb-1 text-xs text-gray-500">عروض مستمرة</p>
-                  <p className="font-extrabold text-[#2E2A28]">على كتب مختارة</p>
+                  <p className="font-extrabold text-[#2E2A28]">
+                    على كتب مختارة
+                  </p>
                 </div>
               </div>
             </div>
@@ -299,9 +301,11 @@ export default function Home() {
           <Section>
             <Slider />
           </Section>
-<Section>
+
+          <Section>
             <CategoriesGrid />
           </Section>
+
           <Section>
             <NewBooks />
           </Section>
@@ -326,7 +330,29 @@ export default function Home() {
             />
           </Section>
 
-          
+          <Section>
+            <PublisherBooksSection
+              title="📚 دار ابن كثير"
+              filter="ibn-katheer"
+              link="/books?filter=ibn-katheer"
+            />
+          </Section>
+
+          <Section>
+            <PublisherBooksSection
+              title="📚 دار الجمل"
+              filter="jamal"
+              link="/books?filter=jamal"
+            />
+          </Section>
+
+          <Section>
+            <PublisherBooksSection
+              title="📚 دار تكوين"
+              filter="takween"
+              link="/books?filter=takween"
+            />
+          </Section>
 
           <Section>
             <LatestManga />

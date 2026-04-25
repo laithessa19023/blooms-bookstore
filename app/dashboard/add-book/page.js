@@ -146,7 +146,6 @@ export default function AddBookPage() {
         {error && <div className="bg-red-100 text-red-600 p-3 rounded-xl">{error}</div>}
         {success && <div className="bg-green-100 text-green-600 p-3 rounded-xl">{success}</div>}
 
-        {/* ✅ الفورم بعد الإصلاح */}
         <div className="bg-white p-6 rounded-3xl shadow space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -168,8 +167,12 @@ export default function AddBookPage() {
                 <option value="arabic">عربي</option>
                 <option value="kids">أطفال</option>
                 <option value="original">أصلي</option>
+
                 <option value="aseer">دار عصير الكتب</option>
                 <option value="rafedain">دار الرافدين</option>
+                <option value="ibn-katheer">دار ابن كثير</option>
+                <option value="jamal">دار الجمل</option>
+                <option value="takween">دار تكوين</option>
               </select>
 
               <input
@@ -189,7 +192,6 @@ export default function AddBookPage() {
               className="w-full border px-4 py-3 rounded-2xl"
             />
 
-            {/* صورة */}
             <div className="grid md:grid-cols-2 gap-4">
               <label className="border p-4 rounded-2xl text-center cursor-pointer">
                 <FiImage className="mx-auto mb-2" />
@@ -221,7 +223,6 @@ export default function AddBookPage() {
           </form>
         </div>
 
-        {/* List */}
         <div className="bg-white p-6 rounded-3xl shadow">
 
           <input
